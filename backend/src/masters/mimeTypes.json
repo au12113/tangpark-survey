@@ -1,0 +1,42 @@
+[
+  {
+    "name": "HTML",
+    "value": "text/html"
+  },
+  {
+    "name": "Text",
+    "value": "text/plain"
+  },
+  {
+    "name": "Pdf",
+    "value": "application/pdf"
+  },
+  {
+    "name": "MS Word",
+    "value": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    "name": "MS Excel",
+    "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  },
+  {
+    "name": "CSV",
+    "value": "text/csv"
+  },
+  {
+    "name": "PNG",
+    "value": "image/png"
+  },
+  {
+    "name": "JPEG",
+    "value": "image/jpeg"
+  },
+  {
+    "name": "MS Powerpoint",
+    "value": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  },
+  {
+    "name": "JSON",
+    "value": "application/vnd.google-apps.script+json"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "name": "tp-survey-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --trace-warnings -r dotenv/config index.js dotenv_config_path=.env",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/au12113/tangpark-survey/backend"
+  },
+  "author": "wasupon.tphq@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "googleapis": "^91.0.0",
+    "pdfkit": "^0.13.0",
+    "xlsx": "^0.17.4"
+  }
+}
