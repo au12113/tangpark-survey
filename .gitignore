@@ -107,3 +107,4 @@ dist
 # Temporary and output files
 */tmp/*
 */output/*
+*.zip

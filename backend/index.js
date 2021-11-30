@@ -6,9 +6,11 @@ const getData = async (token) => {
   const sheet = await excel.filterUrlToId(rawSheet)
   general.writeJSON(sheet, `${filename}.json`)
   sheet.forEach((json) => {
+    const d = json['วันที่สัมภาษณ์']
+    const surveyDate = `${d.getFullYear()+543}-${("0" + (d.getMonth()+1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`
     const sc = json['ผู้สำรวจ']
     const business = json['ชื่อร้านค้า']
-    pdf.exportPDF(json, `${filename}_${sc}-${business}`)
+    pdf.exportPDF(json, `${surveyDate}_${sc}-${business}`)
   })
 }
 

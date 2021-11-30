@@ -52,8 +52,8 @@ const downloadFile = (fileDetail) => {
             return 0
           }
           res.data
-            .on('end', () => {
-              fs.rename(destPath, `${destPath}.jpg`, (err) => {
+            .on('end', async() => {
+              await fs.rename(destPath, `${destPath}.jpg`, (err) => {
                 if (err) {
                   console.log(err)
                 } else {
