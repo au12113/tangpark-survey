@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 
 const getTmpFilePath = (filename) => {
-  return path.join(path.resolve('./tmp/'), filename)
+  return path.join(path.resolve('./tmp/img/'), filename)
 }
 
 const getOutputText = (data, ifUndefined = '', prefixData = '') => {
@@ -14,7 +14,7 @@ const getOutputText = (data, ifUndefined = '', prefixData = '') => {
   }
 }
 
-const exportPDF = (json,pdfName) => {
+const exportPDF = (json, pdfName) => {
   const doc = new PDFDocument({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 210}})
   const writeStream = fs.createWriteStream(path.join(path.resolve('./output/'), `${pdfName}.pdf`), {encoding: 'utf8'})
   const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', calendar: 'buddhist'}
@@ -22,7 +22,7 @@ const exportPDF = (json,pdfName) => {
   doc.pipe(writeStream)
   doc.registerFont('Kanit', path.join(path.resolve('./src/fonts/'),'Kanit-Regular.ttf'))
   doc.font('Kanit')
-  doc.fontSize(10).text('Timestamp: ', 70, 20, contOptions).fontSize(12).text(`${json['ประทับเวลา'].toLocaleDateString('th-TH', dateOptions)} - ${json['ประทับเวลา'].toLocaleTimeString('th-TH')} น.`, { baseline: 'alphabetic'})
+  doc.fontSize(10).text('Timestamp: ', 70, 20, contOptions).fontSize(12).text(`${json[process.env.TIMESTAMPNAME].toLocaleDateString('th-TH', dateOptions)} - ${json[process.env.TIMESTAMPNAME].toLocaleTimeString('th-TH')} น.`, { baseline: 'alphabetic'})
   doc.fontSize(10).text('ผู้สำรวจ: ', contOptions).fontSize(12).text(json['ผู้สำรวจ'])
   doc.fontSize(10).text('วันที่สัมภาษณ์: ', contOptions).fontSize(12).text(json['วันที่สัมภาษณ์'].toLocaleDateString('th-TH', dateOptions))
   doc.moveDown(0.5)
@@ -49,13 +49,13 @@ const exportPDF = (json,pdfName) => {
   doc.fontSize(10).text('รถบรรทุกในครอบครอง [FUSO]: ', contOptions).fontSize(12).text(getOutputText(json['รถบรรทุกในครอบครอง [FUSO]'], '-'))
   doc.fontSize(10).text('รถบรรทุกในครอบครอง [UD]: ', contOptions).fontSize(12).text(getOutputText(json['รถบรรทุกในครอบครอง [UD]'], '-'))
   doc.fontSize(10).text('รถบรรทุกในครอบครอง [อื่นๆ]: ', contOptions).fontSize(12).text(getOutputText(json['รถบรรทุกในครอบครอง [อื่นๆ]'], '-'))
-  doc.fontSize(10).text('คำอธิบายรถในครอบครอง: ', contOptions).fontSize(12).text(getOutputText(json['คำอธิบายรถในครอบครอง ']))
+  doc.fontSize(10).text('คำอธิบายรถในครอบครอง: ', contOptions).fontSize(12).text(getOutputText(json['คำอธิบายรถในครอบครอง '], '-'))
   if (json['ท่านมีโครงการจะซื้อรถบรรทุกเพิ่มหรือไม่'] === 'มี (ระบุรุ่นที่สนใจในข้อถัดไป)') {
     doc.moveDown(0.5)
     doc.fontSize(12).text('มีโครงการจะซื้อรถบรรทุกเพิ่ม', { baseline: 'alphabetic' })
     doc.fontSize(10).text('ระยะเวลาที่จะต้องการออกรถ: ', contOptions).fontSize(12).text(json['ระยะเวลาที่จะต้องการออกรถ'])
     doc.fontSize(10).text('รุ่นที่สนใจ: ', contOptions).fontSize(12).text(json['รุ่นที่สนใจ'])
-    doc.fontSize(10).text('ยี่ห้อที่สนใจซ ', contOptions).fontSize(12).text(json['ยี่ห้อที่สนใจ'])
+    doc.fontSize(10).text('ยี่ห้อที่สนใจ: ', contOptions).fontSize(12).text(json['ยี่ห้อที่สนใจ'])
     doc.fontSize(10).text('เหตุผลที่ต้องการเพิ่มรถ: ', contOptions).fontSize(12).text(json['เหตุผลที่ต้องการเพิ่มรถ'])
     if (json['ปัจจัยหลัก 3 ประการที่จะทำให้เลือกซื้อรถบรรทุก'] !== undefined) 
       doc.fontSize(10).text('ปัจจัยหลัก 3 ประการที่จะทำให้เลือกซื้อรถบรรทุก: ', contOptions).fontSize(12).text(json['ปัจจัยหลัก 3 ประการที่จะทำให้เลือกซื้อรถบรรทุก'])
@@ -69,27 +69,23 @@ const exportPDF = (json,pdfName) => {
     align: 'center',
     valign: 'center'
   })
-  if (json['ท่านมีโครงการจะซื้อรถบรรทุกเพิ่มหรือไม่'] === 'มี (ระบุรุ่นที่สนใจในข้อถัดไป)') {
-    doc.addPage({size: 'A4', margins: { top: 50, bottom: 50, left: 50 }})
-    doc.fontSize(12).text('รูปออกเยี่ยม', { baseline: 'alphabetic' })
-    json['อัพโหลดรูปออกเยี่ยม'].forEach((el, index) => {
-      doc.image(getTmpFilePath(`${el}.jpg`), 70+((index%2)*250), 70+(Math.floor(index/2)*240), {
-        fit: [220, 180],
-        align: 'center',
-        valign: 'top'
-      })
-    });
-  } else {
-    doc.moveDown(1)
-    doc.fontSize(12).text('รูปออกเยี่ยม', { baseline: 'alphabetic' })
-    json['อัพโหลดรูปออกเยี่ยม'].forEach((el, index) => {
-      doc.image(getTmpFilePath(`${el}.jpg`), 70+((index%2)*250), 420+(Math.floor(index/2)*190), {
-        fit: [220, 180],
-        align: 'center',
-        valign: 'top'
-      })
-    });
+  doc.moveDown(1)
+  if(doc.y + 190 > 835) {
+    console.log(doc.y)
+    doc.addPage({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 210}})
   }
+  doc.fontSize(12).text('รูปออกเยี่ยม', { baseline: 'alphabetic' })
+  imgContainerY = doc.y
+  json['อัพโหลดรูปออกเยี่ยม'].forEach((el, index) => {
+    if(imgContainerY+(Math.floor(index/2)*190) > 835) {
+      doc.addPage({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 50}})
+    }
+    doc.image(getTmpFilePath(`${el}.jpg`), 70+((index%2)*250), imgContainerY+(Math.floor(index/2)*190), {
+      fit: [220, 180],
+      align: 'center',
+      valign: 'top'
+    })
+  })
   doc.end()
 }
 

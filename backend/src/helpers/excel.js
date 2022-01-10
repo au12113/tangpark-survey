@@ -3,9 +3,10 @@ const XLSX = require('xlsx')
 
 const { isPageNum, parseSerialDateTime, normalizeYear } = require('./general')
 const { downloadFile } = require('./googleService')
+const cleanGPS = require('./cleanGPS')
 
 const keywordList = ['ตำบล']
-const dateColumn = ['ประทับเวลา', 'วันที่สัมภาษณ์']
+const dateColumn = [process.env.TIMESTAMPNAME, 'วันที่สัมภาษณ์']
 const whichKeywordContain = async (columnName) => {
   let keyword = null
   await keywordList.forEach((key) => {
@@ -34,6 +35,8 @@ const filterUrlToId = async (jsonSheet) => {
         }
         const normalized = normalizeYear(parseDate)
         row[key] = normalized
+      } else if (key.trim()==='GPS(Lat,Long)_1') {
+        row[key] = cleanGPS(row[key])
       } else if (typeof row[key] === 'string' || row[key] instanceof String) {
         if (row[key].includes('http')) {
           if (row[key].includes(',')) {
@@ -59,7 +62,7 @@ const filterUrlToId = async (jsonSheet) => {
 }
 
 const getJSON = (filename, sheetIndex=0) => {
-  const workbook = XLSX.readFile(path.join('./', `/tmp/${filename}.xlsx`))
+  const workbook = XLSX.readFile(path.join('./', `/tmp/excel/${filename}.xlsx`))
   let sheetName = null
   if (isPageNum(sheetIndex)) {
     const sheetList = workbook.SheetNames
@@ -71,4 +74,29 @@ const getJSON = (filename, sheetIndex=0) => {
   return XLSX.utils.sheet_to_json(sheet)
 }
 
-module.exports = { getJSON, filterUrlToId }
+const writeExcel = async (jsonSheet) => {
+  const wb = XLSX.utils.book_new()
+  const ws_column = [process.env.TIMESTAMPNAME, "ผู้สำรวจ", "วันที่สัมภาษณ์", "ชื่อร้านค้า", "ชื่อ-สกุลเจ้าของกิจการ", "เพศ", "อายุ", "กลุ่มลูกค้า", "ประเภทธุรกิจ", "กลุ่มธุรกิจ", "เบอร์มือถือ (ไม่ต้องวรรคหรือขีด เช่น 0812345678)", "แนวโน้มธุกิจของท่านในปัจจุบันเทียบกับปีที่ผ่านมา", "จำนวนรถที่ใช้ในกิจการ: จำนวนรถกระบะ(คัน)", "จำนวนรถที่ใช้ในกิจการ: จำนวนรถบรรทุก(คัน)", "รถบรรทุกในครอบครอง [ISUZU]", "รถบรรทุกในครอบครอง [HINO]", "รถบรรทุกในครอบครอง [FUSO]", "รถบรรทุกในครอบครอง [UD]", "รถบรรทุกในครอบครอง [อื่นๆ]", "คำอธิบายรถในครอบครอง ", "ท่านมีโครงการจะซื้อรถบรรทุกเพิ่มหรือไม่", "ระยะเวลาที่จะต้องการออกรถ", "รุ่นที่สนใจ", "ยี่ห้อที่สนใจ", "เหตุผลที่ต้องการเพิ่มรถ", "ปัจจัยหลัก 3 ประการที่จะทำให้เลือกซื้อรถบรรทุก", "ท่านมีญาติ/คนรู้จักที่มีโครงการซื้อรถบรรทุก (ถ้ามีโปรดระบุชื่อ และเบอร์โทร)", "จังหวัด", "อำเภอ", "ตำบล", "ถนน", "หมู่ (ถ้าไม่มีหมู่ ให้ใช้สัญลักษณ์:  - )", "ที่อยู่บ้านเลขที่", "อัพโหลดรูปออกเยี่ยม","GPS(Lat,Long)","GPS(Lat,Long)_1"]
+  let ws_data = [ ws_column ]
+  await jsonSheet.forEach(async(mem) => {
+    let row = []
+    await ws_column.forEach(async(key) => {
+      if(!(key in mem) || mem[key] === undefined) {
+        await row.push('')
+      } else if(key === 'GPS(Lat,Long)_1') {
+        row = await [...row, `${mem[key].lat}, ${mem[key].lon}` ]
+      } else if(key === process.env.TIMESTAMPNAME) {
+        await row.push(mem[key])
+      } else if(key === 'วันที่สัมภาษณ์') {
+        await row.push(`${mem[key].getFullYear()}/${mem[key].getMonth()+1}/${mem[key].getDate()}`)
+      } else {
+        await row.push(mem[key])
+      }
+    })
+    ws_data.push(row)
+  })
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ws_data, { dateNF: 'YYYY/MM/DD-HH:mm:ss' }), 'Sheet1')
+  XLSX.writeFile(wb, 'test.csv')
+}
+
+module.exports = { getJSON, filterUrlToId, writeExcel}

@@ -17,8 +17,12 @@ google.options({ auth })
 const drive = google.drive('v3')
 
 const exportFile = async (fileId, mimeName) => {
-  const filename = `sheet_${getDateString()}`
-  const destPath = path.join(path.resolve('./tmp/'), `${filename}.xlsx`)
+  const filename = `Sheet_${getDateString()}`
+  const dir = './tmp/excel/'
+  if(!fs.existsSync(dir)) {
+    await fs.mkdirSync(dir, { recursive: true });
+  }
+  const destPath = path.join(path.resolve(dir), `${filename}.xlsx`)
   const dest = fs.createWriteStream(destPath)
   const mimeType = masterHelper("mimeType", mimeName)
 
@@ -36,9 +40,13 @@ const exportFile = async (fileId, mimeName) => {
   return filename
 }
 
-const downloadFile = (fileDetail) => {
+const downloadFile = async(fileDetail) => {
   const { id, name } = fileDetail
-  const destPath = path.join(path.resolve('./tmp/'), name)
+  const dir = './tmp/img/'
+  if(!fs.existsSync(dir)) {
+    await fs.mkdirSync(dir, { recursive: true });
+  }
+  const destPath = path.join(path.resolve(dir), name)
   fs.access(`${destPath}.jpg`, fs.F_OK, (err) => {
     if (err) {
       console.log(`Need to download ${name}.jpg.`)
