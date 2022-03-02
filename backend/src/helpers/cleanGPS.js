@@ -6,11 +6,9 @@ const convertToDegree = (dirty) => {
 }
 
 module.exports = (dirty) => {
-  console.log(dirty)
   dirty = String(dirty).trim().replace(/[()NS]/g, '').trim().replace(/[ ]+[EW][ ]+|(?!([0-9]))[ ]+/g, ',')
   const dirtyLat = dirty.split(',')[0]
   const dirtyLon = dirty.split(',').pop()
-  console.log(dirty, dirtyLat, dirtyLon)
   const lat = dirtyLat ? (dirtyLat.trim().includes('°') ? convertToDegree(dirtyLat.trim()) : Number(dirtyLat.trim())):0
   const lon = dirtyLon ? (dirtyLon.trim().includes('°') ? convertToDegree(dirtyLon.trim()) : Number(dirtyLon.trim())):0
   return { lat, lon }

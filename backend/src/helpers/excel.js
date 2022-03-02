@@ -39,7 +39,7 @@ const filterUrlToId = async (jsonSheet) => {
         row[key] = cleanGPS(row[key])
       } else if (typeof row[key] === 'string' || row[key] instanceof String) {
         if (row[key].includes('http')) {
-          if (row[key].includes(',')) {
+          if (row[key].includes(',') || ["อัพโหลดรูปออกเยี่ยม", "GPS(Lat,Long)"].includes(key.trim())) {
             row[key] = row[key].split(',').map((value) => {
               return value.trim().split('=').pop()
             })
