@@ -5,7 +5,7 @@ const isPageNum = (value) => {
 }
 
 const writeJSON = (json, name) => {
-  fs.writeFileSync(`tmp/${name}`, JSON.stringify(json, null, 2))
+  fs.writeFileSync(`tmp/json/${name}`, JSON.stringify(json, null, 2))
 }
 
 const getDateString = () => {

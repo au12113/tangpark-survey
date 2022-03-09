@@ -108,3 +108,5 @@ dist
 */tmp/*
 */output/*
 *.zip
+
+test.csv

@@ -16,9 +16,15 @@ const auth = new google.auth.GoogleAuth({
 google.options({ auth })
 const drive = google.drive('v3')
 
+const getFileName = async (fileId) => {
+  const res = await drive.files.get({fileId})
+  return res.data.name.split('(')[0].trim().replace('/', '-')
+}
+
 const exportFile = async (fileId, mimeName) => {
-  const filename = `Sheet_${getDateString()}`
-  const dir = './tmp/excel/'
+  const name = await getFileName(fileId)
+  const filename = `${name}_${getDateString()}`
+  const dir = './tmp/dirty-excel/'
   if(!fs.existsSync(dir)) {
     await fs.mkdirSync(dir, { recursive: true });
   }

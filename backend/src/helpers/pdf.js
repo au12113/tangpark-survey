@@ -22,7 +22,7 @@ const exportPDF = (json, pdfName) => {
   doc.pipe(writeStream)
   doc.registerFont('Kanit', path.join(path.resolve('./src/fonts/'),'Kanit-Regular.ttf'))
   doc.font('Kanit')
-  doc.fontSize(10).text('Timestamp: ', 70, 20, contOptions).fontSize(12).text(`${json[process.env.TIMESTAMPNAME].toLocaleDateString('th-TH', dateOptions)} - ${json[process.env.TIMESTAMPNAME].toLocaleTimeString('th-TH')} น.`, { baseline: 'alphabetic'})
+  doc.fontSize(10).text('Timestamp: ', 70, 20, contOptions).fontSize(12).text(`${json['Timestamp'].toLocaleDateString('th-TH', dateOptions)} - ${json['Timestamp'].toLocaleTimeString('th-TH')} น.`, { baseline: 'alphabetic'})
   doc.fontSize(10).text('ผู้สำรวจ: ', contOptions).fontSize(12).text(json['ผู้สำรวจ'])
   doc.fontSize(10).text('วันที่สัมภาษณ์: ', contOptions).fontSize(12).text(json['วันที่สัมภาษณ์'].toLocaleDateString('th-TH', dateOptions))
   doc.moveDown(0.5)
