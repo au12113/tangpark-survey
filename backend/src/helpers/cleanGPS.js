@@ -11,6 +11,5 @@ module.exports = async (dirty) => {
   const dirtyLon = dirty.split(',').pop()
   const lat = dirtyLat ? (dirtyLat.trim().includes('°') ? convertToDegree(dirtyLat.trim()) : Number(dirtyLat.trim()).toFixed(6)):0
   const lon = dirtyLon ? (dirtyLon.trim().includes('°') ? convertToDegree(dirtyLon.trim()) : Number(dirtyLon.trim()).toFixed(6)):0
-  console.log(`${dirty}: ${lat}, ${lon}`)
   return `${lat}, ${lon}`
 }

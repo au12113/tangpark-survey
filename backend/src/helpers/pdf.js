@@ -14,9 +14,14 @@ const getOutputText = (data, ifUndefined = '', prefixData = '') => {
   }
 }
 
-const exportPDF = (json, pdfName) => {
+const exportPDF = (json, pdfName, subFolder=null) => {
   const doc = new PDFDocument({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 210}})
-  const writeStream = fs.createWriteStream(path.join(path.resolve('./output/'), `${pdfName}.pdf`), {encoding: 'utf8'})
+  const folderPath = subFolder !== null ? `./output/${subFolder}` : './output/'
+  if(subFolder !== null && !fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true })
+  }
+  const pdfPath = path.join(path.resolve(folderPath), `${pdfName}.pdf`)
+  const writeStream = fs.createWriteStream( pdfPath, {encoding: 'utf8'})
   const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', calendar: 'buddhist'}
   const contOptions = { continued: true, baseline: 'alphabetic' }
   doc.pipe(writeStream)
@@ -41,6 +46,12 @@ const exportPDF = (json, pdfName) => {
   doc.fontSize(10).text('เพศ: ', contOptions).fontSize(12).text(json['เพศ'], contOptions)
     .fontSize(10).text('  อายุ: ', contOptions).fontSize(12).text(json['อายุ'])
   doc.fontSize(10).text('เบอร์มือถือ: ', contOptions).fontSize(12).text(json['เบอร์มือถือ (ไม่ต้องวรรคหรือขีด เช่น 0812345678)'])
+  if('เบอร์บ้าน (ไม่ต้องวรรคหรือขีด เช่น 045123456)' in json) {
+    doc.fontSize(10).text('เบอร์บ้าน: ', contOptions).fontSize(12).text(json['เบอร์บ้าน (ไม่ต้องวรรคหรือขีด เช่น 045123456)'])
+  }
+  if('LINE_id' in json) {
+    doc.fontSize(10).text('LINE: ', contOptions).fontSize(12).text(json['LINE_id'])
+  }
   doc.fontSize(10).text('กลุ่มลูกค้า: ', contOptions).fontSize(12).text(json['กลุ่มลูกค้า'])
   doc.fontSize(10).text('จำนวนรถกระบะที่ใช้ในกิจการ: ', contOptions).fontSize(12).text(json['จำนวนรถที่ใช้ในกิจการ: จำนวนรถกระบะ(คัน)'])
   doc.fontSize(10).text('จำนวนรถบรรทุกที่ใช้ในกิจการ: ', contOptions).fontSize(12).text(json['จำนวนรถที่ใช้ในกิจการ: จำนวนรถบรรทุก(คัน)'])
@@ -71,7 +82,6 @@ const exportPDF = (json, pdfName) => {
   })
   doc.moveDown(1)
   if(doc.y + 190 > 835) {
-    console.log(doc.y)
     doc.addPage({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 210}})
   }
   doc.fontSize(12).text('รูปออกเยี่ยม', { baseline: 'alphabetic' })

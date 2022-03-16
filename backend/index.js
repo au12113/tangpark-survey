@@ -12,7 +12,7 @@ const getData = async (token, timestampName) => {
     const surveyDate = `${d.getFullYear()+543}-${("0" + (d.getMonth()+1)).slice(-2)}-${("0" + d.getDate()).slice(-2)}`
     const sc = json['ผู้สำรวจ']
     const business = json['ชื่อร้านค้า']
-    pdf.exportPDF(json, `${surveyDate}_${sc}-${business}`)
+    pdf.exportPDF(json, `${surveyDate}_${sc}-${business}`, filename)
   })
 }
 
