@@ -2,6 +2,9 @@ const fs = require('fs')
 const path = require('path')
 const { google } = require('googleapis')
 
+const piexif = require('piexifjs')
+const jo = require('jpeg-autorotate')
+
 const masterHelper = require('./master')
 const { getDateString } = require('./general')
 
@@ -16,6 +19,15 @@ const auth = new google.auth.GoogleAuth({
 google.options({ auth })
 const drive = google.drive('v3')
 
+const deleteThumbnailFromExif = async (path) => {
+  let imgBuffer = await fs.promises.readFile(path, { encoding: 'binary' })
+  let exifObj = piexif.load(imgBuffer)
+  delete exifObj['thumbnail']
+  delete exifObj['1st']
+  const exifBytes = piexif.dump(exifObj)
+  return Buffer.from(piexif.insert(exifBytes, imgBuffer), 'binary')
+}
+
 const getFileName = async (fileId) => {
   const res = await drive.files.get({fileId})
   return res.data.name.split('(')[0].trim().replace('/', '-')
@@ -26,7 +38,7 @@ const exportFile = async (fileId, mimeName) => {
   const filename = `${name}_${getDateString()}`
   const dir = './tmp/dirty-excel/'
   if(!fs.existsSync(dir)) {
-    await fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true });
   }
   const destPath = path.join(path.resolve(dir), `${filename}.xlsx`)
   const dest = fs.createWriteStream(destPath)
@@ -46,11 +58,11 @@ const exportFile = async (fileId, mimeName) => {
   return filename
 }
 
-const downloadFile = async(fileDetail) => {
+const downloadFile = (fileDetail) => {
   const { id, name } = fileDetail
   const dir = './tmp/img/'
   if(!fs.existsSync(dir)) {
-    await fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true });
   }
   const destPath = path.join(path.resolve(dir), name)
   fs.access(`${destPath}.jpg`, fs.F_OK, (err) => {
@@ -63,21 +75,24 @@ const downloadFile = async(fileDetail) => {
         (err, res) => {
           if (err || res === undefined) {
             console.log(err)
-            return 0
           }
           res.data
-            .on('end', async() => {
-              await fs.rename(destPath, `${destPath}.jpg`, (err) => {
-                if (err) {
-                  console.log(err)
-                } else {
-                  console.log(`${id} Done.`)
+            .on('end', async () => {
+              await fs.promises.rename(destPath, `${destPath}.jpg`)
+              deleteThumbnailFromExif(`${destPath}.jpg`)
+              jo.rotate(`${destPath}.jpg`, { quality: 60 }, (error, buffer) => {
+                if (error && error !== jo.errors.correct_orientation) {
+                  console.log('An error occurred when rotating the file: ' + error.message)
                 }
+                fs.writeFile(`${destPath}.jpg`, buffer, (err) => {
+                  if (err) {
+                    console.log('write file'+err)
+                  }
+                })
               })
             })
             .on('error', (err) => {
               console.log(err)
-              return 0
             })
             .pipe(dest)
         })

@@ -1,17 +1,26 @@
-[
-  {
-    "name": "WR",
-    "timestampName": "Timestamp",
-    "fileId": "1GXXGhGZm3kmjd3ZyFg0vjRm4SWuIaMyPWx50XcCW56U"
-  },
-  {
-    "name": "MK",
-    "timestampName": "ประทับเวลา",
-    "fileId": "1PYPOkSkQUKz9LAro5zuYLwBKqGSLLMln_7LR3a-nCn0"
-  },
-  {
-    "name": "YS",
-    "timestampName": "Timestamp",
-    "fileId": "1296ZAdnI0SgYZcUOUIKT_UXF4L_pyEw-FMliKQNtH_I"
-  }
-]
+{
+  "mapping": [
+    {
+      "name": "WR",
+      "timestampName": "Timestamp",
+      "fileId": "1GXXGhGZm3kmjd3ZyFg0vjRm4SWuIaMyPWx50XcCW56U"
+    },
+    {
+      "name": "MK",
+      "timestampName": "ประทับเวลา",
+      "fileId": "1PYPOkSkQUKz9LAro5zuYLwBKqGSLLMln_7LR3a-nCn0"
+    },
+    {
+      "name": "YS",
+      "timestampName": "Timestamp",
+      "fileId": "1296ZAdnI0SgYZcUOUIKT_UXF4L_pyEw-FMliKQNtH_I"
+    }
+  ],
+  "potential": [
+    {
+      "name": "Potential",
+      "timestampName": "Timestamp",
+      "fileId": "18QBF7uCWpQOJYtXp7Xn56mX_MiW0HMalJ81rsVXKymc"
+    }
+  ]
+}
