@@ -36,19 +36,25 @@ const getPDFName = (json) => {
 }
 
 const getData = async (token, timestampName) => {
-  const filename = await googleService.exportFile(token, 'MS Excel')
-  const rawSheet = await excel.getJSON(filename, timestampName)
-  const sheet = await excel.filterUrlToId(rawSheet)
-  general.writeJSON(sheet, `${filename}.json`)
-  excel.writeExcel(sheet, `${filename}.xlsx`)
-  if(argv['mode'] === 'potential') {
-    sheet.forEach((json) => {
-      pdf.exportSimplePDF(json, getPDFName(json), filename)
-    })
-  } else if(argv['mode'] === 'mapping') {
-    sheet.forEach((json) => {
-      pdf.exportPDF(json, getPDFName(json), filename)
-    })    
+  try {
+    const filename = await googleService.exportFile(token, 'MS Excel')
+    const rawSheet = await excel.getJSON(filename, timestampName)
+    if(rawSheet) {
+      const sheet = await excel.filterUrlToId(rawSheet)
+      await general.writeJSON(sheet, `${filename}.json`)
+      await excel.writeExcel(sheet, `${filename}.xlsx`)
+      if(argv['mode'] === 'potential') {
+        sheet.forEach((json) => {
+          pdf.exportSimplePDF(json, getPDFName(json), filename)
+        })
+      } else if(argv['mode'] === 'mapping') {
+        sheet.forEach((json) => {
+          pdf.exportPDF(json, getPDFName(json), filename)
+        })    
+      }
+    }
+  } catch (e) {
+    console.log(e)
   }
 }
 

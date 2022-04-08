@@ -22,9 +22,8 @@ const whichKeywordContain = async (columnName) => {
 
 const filterUrlToId = async (jsonSheet) => {
   const dateColumn = ['Timestamp', 'วันที่สัมภาษณ์']
-  let sheet = []
-  await jsonSheet.forEach( async (row) => {
-    await Object.keys(row).forEach( async(key)=> {
+  return await jsonSheet.reduce(async(prev, row, rowIndex) => {
+    const rowData = Object.keys(row).forEach(async(key)=> {
       const { isKey, keyword } = await whichKeywordContain(key) 
       if (dateColumn.indexOf(key)!==-1) {
         if(typeof row[key] === 'string') {
@@ -43,12 +42,12 @@ const filterUrlToId = async (jsonSheet) => {
             row[key] = row[key].split(',').map((value) => {
               return value.trim().split('=').pop()
             })
-            row[key].forEach(async(val) => {
-              downloadFile({ id: val, name: val })
-            })
+            new Promise((resolve, reject) => row[key].forEach(async(val) => {
+              resolve(downloadFile({ id: val, name: val }))
+            }))
           } else {
             row[key] = row[key].trim().split('=').pop()
-            downloadFile({ id: row[key], name: row[key] })
+            new Promise((resolve, reject) => resolve(downloadFile({ id: row[key], name: row[key] })))
           }
         } else if (isKey) {
           row[keyword] = row[key]
@@ -56,25 +55,27 @@ const filterUrlToId = async (jsonSheet) => {
         }
       }
     })
-    sheet.push(row)
-  })
-  return sheet
+    prev[rowIndex] = rowData
+    return prev
+  }, Promise.all([...[]]))
 }
 
 const getJSON = (filename, timestampName, sheetIndex=0) => {
-  const workbook = XLSX.readFile(path.join('./', `/tmp/dirty-excel/${filename}.xlsx`))
-  let sheetName = null
-  if (isPageNum(sheetIndex)) {
-    const sheetList = workbook.SheetNames
-    sheetName = sheetList[sheetIndex]
-  } else {
-    sheetName = sheetIndex
-  }
-  let sheet = workbook.Sheets[sheetName]
-  if(timestampName !== 'Timestamp') {
-    sheet['A1'] = { t: 's', v: 'Timestamp', r: '<t>Timestamp</t>', h: 'Timestamp', w: 'Timestamp' }
-  }
-  return XLSX.utils.sheet_to_json(sheet)
+  return new Promise((resolve, reject) => {
+    const workbook = XLSX.readFile(path.join('./', `/tmp/dirty-excel/${filename}.xlsx`))
+    let sheetName = null
+    if (isPageNum(sheetIndex)) {
+      const sheetList = workbook.SheetNames
+      sheetName = sheetList[sheetIndex]
+    } else {
+      sheetName = sheetIndex
+    }
+    let sheet = workbook.Sheets[sheetName]
+    if (timestampName !== 'Timestamp') {
+      sheet['A1'] = { t: 's', v: 'Timestamp', r: '<t>Timestamp</t>', h: 'Timestamp', w: 'Timestamp' }
+    }
+    return resolve(XLSX.utils.sheet_to_json(sheet))
+  })
 }
 
 const writeExcel = async (jsonSheet, filename) => {
@@ -90,24 +91,24 @@ const writeExcel = async (jsonSheet, filename) => {
     "ท่านมีญาติ/คนรู้จักที่มีโครงการซื้อรถบรรทุก (ถ้ามีโปรดระบุชื่อ และเบอร์โทร)", "ชื่อ เบอร์ติดต่อ",
     "จังหวัด", "อำเภอ", "ตำบล", "ถนน", "หมู่ (ถ้าไม่มีหมู่ ให้ใช้สัญลักษณ์:  - )",
     "ที่อยู่บ้านเลขที่", "อัพโหลดรูปออกเยี่ยม","GPS(Lat,Long)","GPS(Lat,Long)_1"]
-  let ws_data = [ ws_column ]
-  await jsonSheet.forEach(async(mem) => {
-    let row = []
-    await ws_column.forEach(async(key) => {
+  const ws_data = await jsonSheet.reduce((prevRecord, mem, rowIndex) => {
+    let row = ws_column.reduce((pre, key, keyIndex) => {
       if(!(key in mem) || mem[key] === undefined) {
-        await row.push('')
+        pre[keyIndex] = ''
       } else if(key === 'GPS(Lat,Long)_1') {
-        row = await [...row, `${mem[key].lat}, ${mem[key].lon}` ]
+        pre[keyIndex] = `${mem[key].lat}, ${mem[key].lon}`
       } else if(key === 'Timestamp') {
-        await row.push(mem[key])
+        pre[keyIndex] = mem[key]
       } else if(key === 'วันที่สัมภาษณ์') {
-        await row.push(`${mem[key].getFullYear()}/${mem[key].getMonth()+1}/${mem[key].getDate()}`)
+        pre[keyIndex] = `${mem[key].getFullYear()}/${mem[key].getMonth()+1}/${mem[key].getDate()}`
       } else {
-        await row.push(mem[key])
+        pre[keyIndex] = mem[key]
       }
-    })
-    ws_data.push(row)
-  })
+      return pre
+    }, [])
+    prevRecord[rowIndex+1] = row
+    return prevRecord
+  }, [ ws_column ])
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ws_data, { dateNF: 'YYYY/MM/DD-HH:mm:ss' }), 'Sheet1')
   await XLSX.writeFile(wb, path.resolve('./', `tmp/excel/${filename}`))
 }

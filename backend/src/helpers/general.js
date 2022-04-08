@@ -4,8 +4,8 @@ const isPageNum = (value) => {
   return /^\d+$/.test(value)
 }
 
-const writeJSON = (json, name) => {
-  fs.writeFileSync(`tmp/json/${name}`, JSON.stringify(json, null, 2))
+const writeJSON = async (json, name) => {
+  await fs.promises.writeFile(`tmp/json/${name}`, JSON.stringify(json, null, 2))
 }
 
 const getDateString = () => {

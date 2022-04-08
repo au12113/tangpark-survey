@@ -59,44 +59,48 @@ const exportFile = async (fileId, mimeName) => {
 }
 
 const downloadFile = (fileDetail) => {
-  const { id, name } = fileDetail
-  const dir = './tmp/img/'
-  if(!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  const destPath = path.join(path.resolve(dir), name)
-  fs.access(`${destPath}.jpg`, fs.F_OK, (err) => {
-    if (err) {
-      console.log(`Need to download ${name}.jpg.`)
-      const dest = fs.createWriteStream(destPath)
-      drive.files.get(
-        { fileId: id, alt: 'media' },
-        { responseType: 'stream' },
-        (err, res) => {
-          if (err || res === undefined) {
-            console.log(err)
-          }
-          res.data
-            .on('end', async () => {
-              await fs.promises.rename(destPath, `${destPath}.jpg`)
-              deleteThumbnailFromExif(`${destPath}.jpg`)
-              jo.rotate(`${destPath}.jpg`, { quality: 60 }, (error, buffer) => {
-                if (error && error !== jo.errors.correct_orientation) {
-                  console.log('An error occurred when rotating the file: ' + error.message)
-                }
-                fs.writeFile(`${destPath}.jpg`, buffer, (err) => {
-                  if (err) {
-                    console.log('write file'+err)
+  new Promise((resolve, reject) => {
+    const { id, name } = fileDetail
+    const dir = './tmp/img/'
+    if(!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const destPath = path.join(path.resolve(dir), name)
+    fs.access(`${destPath}.jpg`, fs.F_OK, (err) => {
+      if (err) {
+        console.log(`Need to download ${name}.jpg.`)
+        const dest = fs.createWriteStream(destPath)
+        drive.files.get(
+          { fileId: id, alt: 'media' },
+          { responseType: 'stream' },
+          (err, res) => {
+            if (err || res === undefined) {
+              reject(console.log(err))
+            }
+            res.data
+              .on('end', async () => {
+                await fs.promises.rename(destPath, `${destPath}.jpg`)
+                deleteThumbnailFromExif(`${destPath}.jpg`)
+                jo.rotate(`${destPath}.jpg`, { quality: 60 }, (error, buffer) => {
+                  if (!error.code === jo.errors.correct_orientation && !error.code === jo.errors.no_orientation) {
+                    console.log('An error occurred when rotating the file: ' + error.message)
                   }
+                  resolve(fs.writeFile(`${destPath}.jpg`, buffer, (err) => {
+                    if (err) {
+                      reject(console.log('write file'+err))
+                    } else {
+                      console.log(`${id} done.`)
+                    }
+                  }))
                 })
               })
-            })
-            .on('error', (err) => {
-              console.log(err)
-            })
-            .pipe(dest)
-        })
-    } 
+              .on('error', (err) => {
+                console.log(err)
+              })
+              .pipe(dest)
+          })
+      } 
+    })
   })
 }
 
