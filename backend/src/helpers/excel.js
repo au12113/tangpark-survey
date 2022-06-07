@@ -22,8 +22,8 @@ const whichKeywordContain = async (columnName) => {
 
 const filterUrlToId = async (jsonSheet) => {
   const dateColumn = ['Timestamp', 'วันที่สัมภาษณ์']
-  return await jsonSheet.reduce(async(prev, row, rowIndex) => {
-    const rowData = Object.keys(row).forEach(async(key)=> {
+  return await jsonSheet.reduce((prev, row, rowIndex) => {
+    Object.keys(row).forEach(async(key)=> {
       const { isKey, keyword } = await whichKeywordContain(key) 
       if (dateColumn.indexOf(key)!==-1) {
         if(typeof row[key] === 'string') {
@@ -55,9 +55,9 @@ const filterUrlToId = async (jsonSheet) => {
         }
       }
     })
-    prev[rowIndex] = rowData
+    prev.push(row)
     return prev
-  }, Promise.all([...[]]))
+  }, [])
 }
 
 const getJSON = (filename, timestampName, sheetIndex=0) => {

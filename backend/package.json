@@ -17,9 +17,9 @@
     "buffer-split": "^1.0.0",
     "dotenv": "^10.0.0",
     "googleapis": "^91.0.0",
-    "jpeg-autorotate": "^8.0.1",
+    "pdf2pic": "^2.1.4",
     "pdfkit": "^0.13.0",
-    "piexifjs": "^1.0.6",
+    "sharp": "^0.30.6",
     "xlsx": "^0.17.4",
     "yargs": "^17.4.0"
   }

@@ -1,6 +1,8 @@
 const { excel, general, pdf, googleService } = require('./src/helpers')
 const { fileIdList } = require('./src/masters')
 
+global.__basedir = __dirname
+
 const argv = require('yargs/yargs')(process.argv.slice(2))
   .alias('m', 'mode')
   .describe('m', 'choose type of survey')
