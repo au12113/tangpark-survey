@@ -3,15 +3,24 @@ const { fileIdList } = require('./src/masters')
 
 global.__basedir = __dirname
 
-const argv = require('yargs/yargs')(process.argv.slice(2))
+global.__argv = require('yargs/yargs')(process.argv.slice(2))
   .alias('m', 'mode')
   .describe('m', 'choose type of survey')
   .choices('m', ['potential', 'mapping'])
+  .alias('s', 'separate')
+  .describe('s', 'choose separate by file or by month')
+  .choices('s', ['file', 'month'])
+  .alias('t', 'datetag')
+  .describe('t', 'add date in report name')
+  .boolean('t')
+  .alias('d', 'debug')
+  .describe('d', 'write processing data to tmp folder.')
+  .boolean('d')
   .help('help')
   .argv
 
 const getPDFName = (json) => {
-  const mode = argv['mode']
+  const mode = __argv['mode']
   switch(mode) {
     case 'potential':
       const branch = json['สาขาที่ออกเยี่ยม']
@@ -38,28 +47,27 @@ const getPDFName = (json) => {
 }
 
 const getData = async (token, timestampName) => {
-  try {
-    const filename = await googleService.exportFile(token, 'MS Excel')
-    const rawSheet = await excel.getJSON(filename, timestampName)
-    if(rawSheet) {
-      const sheet = await excel.filterUrlToId(rawSheet)
+  const filename = await googleService.exportFile(token, 'MS Excel')
+  const rawSheet = await excel.getJSON(filename, timestampName)
+  if (rawSheet) {
+    const sheet = await excel.filterUrlToId(rawSheet)
+    if (__argv['debug']) {
       await general.writeJSON(sheet, `${filename}.json`)
       await excel.writeExcel(sheet, `${filename}.xlsx`)
-      if(argv['mode'] === 'potential') {
-        sheet.forEach((json) => {
-          pdf.exportSimplePDF(json, getPDFName(json), filename)
-        })
-      } else if(argv['mode'] === 'mapping') {
-        sheet.forEach((json) => {
-          pdf.exportPDF(json, getPDFName(json), filename)
-        })    
-      }
     }
-  } catch (e) {
-    console.log(e)
+    if (__argv['mode'] === 'potential') {
+      await sheet.forEach(async(json) => {
+        await excel.writeExcel(sheet, `${filename}.xlsx`, 'potentialExcel')
+        pdf.exportSimplePDF(json, getPDFName(json), `potentialPDF/${filename}`)
+      })
+    } else if (__argv['mode'] === 'mapping') {
+      await sheet.forEach((json) => {
+        pdf.exportPDF(json, getPDFName(json), `mapping/${filename}`)
+      })
+    }
   }
 }
 
-fileIdList[argv['mode']].forEach((el) => {
+fileIdList[__argv['mode']].forEach((el) => {
   getData(el.fileId, el.timestampName)
 })
