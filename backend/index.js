@@ -56,8 +56,8 @@ const getData = async (token, timestampName) => {
       await excel.writeExcel(sheet, `${filename}.xlsx`)
     }
     if (__argv['mode'] === 'potential') {
+      await excel.writeExcel(sheet, `${filename}.xlsx`, 'potentialExcel')
       await sheet.forEach(async(json) => {
-        await excel.writeExcel(sheet, `${filename}.xlsx`, 'potentialExcel')
         pdf.exportSimplePDF(json, getPDFName(json), `potentialPDF/${filename}`)
       })
     } else if (__argv['mode'] === 'mapping') {

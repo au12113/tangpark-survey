@@ -16,6 +16,8 @@
   "dependencies": {
     "buffer-split": "^1.0.0",
     "dotenv": "^10.0.0",
+    "exceljs": "^4.3.0",
+    "gm": "^1.23.1",
     "googleapis": "^91.0.0",
     "pdf2pic": "^2.1.4",
     "pdfkit": "^0.13.0",

@@ -8,7 +8,7 @@ This project requires [**GraphicsMagick**](https://sourceforge.net/projects/grap
 - mode: [ 'potential', 'mapping' ]
 - separate_file: [ 'file', 'date' ]
 - use -t for named file with date string
-- use -d for debuging by saving temporary file to check file between process
+- use -d for saving temporary files(pdf, json, excel)
 
 ---
 ## Troubleshooting:
@@ -28,6 +28,8 @@ This project requires [**GraphicsMagick**](https://sourceforge.net/projects/grap
     - ghostscript can be gswin32 or gswin64, so don't have to change their name.
     ```
 
+- [Error: VipsJpeg: Invalid SOS parameters for sequential JPEG](https://github.com/lovell/sharp/issues/1578)
+  - Some camera firmwares make invalid JPEG. Just add sharp's options { failOnError: false } to ignore invalid info parts. 
 ---
 ## License
 [MIT](LICENSE)

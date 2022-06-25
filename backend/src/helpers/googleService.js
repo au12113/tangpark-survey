@@ -3,7 +3,7 @@ const path = require('path')
 const { google } = require('googleapis')
 
 const sharp = require('sharp')
-const { fromBuffer, fromPath } = require('pdf2pic')
+const { fromBuffer } = require('pdf2pic')
 
 const masterHelper = require('./master')
 const { getDateString } = require('./general')
@@ -22,7 +22,7 @@ const drive = google.drive('v3')
 
 const normalizeImage = async (buffer, id, customWidth=undefined) => {
   const width = customWidth ? customWidth : 640
-  return await sharp(buffer)
+  return await sharp(buffer, { failOnError: false })
     .rotate()
     .resize({width: width})
     .toFormat('jpeg')
@@ -110,6 +110,7 @@ const downloadFile = async (fileDetail) => {
             .on('end', async () => {
               const downloaded = await convertPDFtoImage(Buffer.concat(buff), mimeType, id)
               await normalizeImage(downloaded, id)
+              await normalizeImage(downloaded, id+'-sm', 128)
             })
             .on('data', (chunk) => {
               buff.push(chunk)
