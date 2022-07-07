@@ -42,10 +42,31 @@ const normalizeYear = (date) => {
   return date
 }
 
+const potentialSeq = (date) => {
+  const dateStr = (date.getFullYear()+543) + '-' + (Math.ceil((date.getMonth()+1)/2))
+  return dateStr
+}
+
+const assign = (obj, keyPath, val) => {
+  const lastKey = keyPath.pop()
+  let lastObj = keyPath.reduce((obj, key) => obj[val[key]] = !obj[val[key]] ? {} : obj[val[key]], obj)
+  lastObj[lastKey] = !lastObj[lastKey] ? [val] : [...lastObj[lastKey], val]
+  return obj
+}
+
+const splitJsonSheet = async (jsonSheet) => {
+  return jsonSheet.reduce(async(prevPromise, row) => {
+    const acc = await prevPromise
+    const pSeq = potentialSeq(row['วันที่ออกเยี่ยม'])
+    return Promise.resolve(assign(acc, ['สาขาที่ออกเยี่ยม', pSeq], row))
+  }, Promise.resolve({}))
+}
+
 module.exports = {
   isPageNum,
   writeJSON,
   getDateString,
   parseSerialDateTime,
-  normalizeYear
+  normalizeYear,
+  splitJsonSheet
 }

@@ -3,12 +3,10 @@ This project requires [**GraphicsMagick**](https://sourceforge.net/projects/grap
 
 ### Use on NodeJs
 
-> npm start -- -m=[*mode*] [-s=*separate_file*] [-t] [-d]
+> npm start -- -m=[*mode*] [-d=*YYYYMMDD*]
 
 - mode: [ 'potential', 'mapping' ]
-- separate_file: [ 'file', 'date' ]
-- use -t for named file with date string
-- use -d for saving temporary files(pdf, json, excel)
+- use -d for specify date to make report with YYYYMMDD pattern
 
 ---
 ## Troubleshooting:

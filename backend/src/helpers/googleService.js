@@ -54,10 +54,8 @@ const getFileName = async (fileId) => {
   return res.data.name.split('(')[0].trim().replace('/', '-')
 }
 
-const exportFile = async (fileId, mimeName) => {  
-  const needDateTag = __argv['datetag']
-  const name = await getFileName(fileId)
-  const filename = needDateTag ? `${name}_${getDateString()}` : name
+const exportFile = async (fileId, mimeName) => {
+  const filename = await getFileName(fileId)
   const dir = './tmp/dirty-excel/'
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
