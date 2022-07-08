@@ -57,11 +57,6 @@ const getData = async (token, timestampName) => {
           await excel.writeExcel(splited[branch][date], `${branch}_${date}_${__argv['mode']}.xlsx`, 'potentialExcel')
         })
       })
-      // await jsonSheet.forEach(async(json) => {
-      //   const surveyDate = json['วันที่ออกเยี่ยม']
-      //   const surveyMonth = `${surveyDate.getFullYear()+543}-${("0" + (surveyDate.getMonth()+1)).slice(-2)}`
-      //   pdf.exportSimplePDF(json, getPDFName(json), `${filename}/${surveyMonth}`)
-      // })
     } else if (__argv['mode'] === 'mapping') {
       await jsonSheet.forEach((json) => {
         const surveyDate = json['วันที่สัมภาษณ์']

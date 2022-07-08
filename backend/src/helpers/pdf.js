@@ -24,35 +24,6 @@ const getWriteStream = (pdfName, subFolder=null) => {
   return writeStream
 }
 
-const exportSimplePDF = (json, pdfName, subFolder=null) => {
-  const doc = new PDFDocument({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 210}})
-  const contOptions = { continued: true, baseline: 'alphabetic' }
-  doc.pipe(getWriteStream(pdfName, subFolder))
-  doc.registerFont('Kanit', path.join(path.resolve('./src/fonts/'),'Kanit-Regular.ttf'))
-  doc.font('Kanit')
-  if('ชื่อบริษัท' in json) {
-    doc.fontSize(10).text('ชื่อบริษัท/กลุ่ม: ', contOptions).fontSize(12).text(json['คำนำหน้าบริษัท'].trim()+json['ชื่อบริษัท'].trim())
-  } else if('ชื่อกลุ่ม และ/หรือหัวหน้ากลุ่ม' in json) {
-    doc.fontSize(10).text('ชื่อบริษัท/กลุ่ม: ', contOptions).fontSize(12).text(json['ชื่อกลุ่ม และ/หรือหัวหน้ากลุ่ม'].trim())
-  } else {
-    doc.fontSize(10).text('ชื่อบริษัท/กลุ่ม: -')
-  }  
-  doc.fontSize(10).text('ชื่อลูกค้า: ', contOptions).fontSize(12).text(json['ชื่อลูกค้า '])
-  doc.moveDown(0.5)
-  imgContainerY = doc.y
-  json['อัพโหลดรูปออกเยี่ยม'].forEach((el, index) => {
-    if(imgContainerY > 835) {
-      doc.addPage({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 50}})
-    }
-    doc.image(getTmpFilePath(`${el}.jpg`), 50, imgContainerY + (index * 190), {
-      fit: [440, 360],
-      align: 'center',
-      valign: 'top'
-    })
-  })
-  doc.end()
-}
-
 const exportPDF = (json, pdfName, subFolder=null) => {
   const doc = new PDFDocument({size: 'A4', margins: { top: 50, bottom: 50, left: 50, right: 210}})
   const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', calendar: 'buddhist'}
@@ -132,4 +103,4 @@ const exportPDF = (json, pdfName, subFolder=null) => {
   doc.end()
 }
 
-module.exports = { exportPDF, exportSimplePDF }
+module.exports = { exportPDF }

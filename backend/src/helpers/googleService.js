@@ -32,8 +32,6 @@ const normalizeImage = async (buffer, id, customWidth=undefined) => {
 
 const convertPDFtoImage = async (buffer, mimeType, id='tmp') => {
   if (mimeType === "application/pdf") {
-    // console.log(id, mimeType)
-    // await fs.promises.writeFile(`./tmp/pdf/${id}.pdf`, buffer)
     const tmpPath = await fromBuffer(buffer, {
       quality: 90,
       width: 648,
